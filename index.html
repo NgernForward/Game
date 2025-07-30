@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>บทเรียน Godot Engine 2D + แบบทดสอบ</title>
+<!-- ฟอนต์ Prompt -->
+<link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Prompt', sans-serif;
+    background: linear-gradient(135deg, #a8e063, #faff79);
+    color: #355e3b;
+    margin: 0;
+    padding: 15px 15px 50px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #container {
+    background: #f7ffe5;
+    color: #355e3b;
+    max-width: 700px;
+    width: 100%;
+    border-radius: 15px;
+    padding: 30px 40px;
+    box-shadow: 0 10px 35px rgba(138, 176, 69, 0.5);
+    margin-top: 40px;
+  }
+  h1, h2 {
+    color: #5a7d2a;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  p, ul, pre {
+    line-height: 1.6;
+  }
+  ul {
+    padding-left: 20px;
+  }
+  img {
+    max-width: 100%;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(138, 176, 69, 0.2);
+  }
+  .explain {
+    background: #dff0d8;
+    border-left: 6px solid #5a7d2a;
+    padding: 14px 20px;
+    margin: 20px 0 30px;
+    color: #3a5521;
+    font-style: italic;
+    border-radius: 8px;
+  }
+
+  /* ฟอร์มชื่อ */
+  #nameForm {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto 40px;
+  }
+  #nameForm label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #5a7d2a;
+  }
+  #nameInput {
+    padding: 10px 14px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    border: 2px solid #5a7d2a;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  #nameInput:focus {
+    border-color: #a8e063;
+  }
+  button {
+    margin-top: 20px;
+    background: linear-gradient(90deg, #5a7d2a, #a8e063);
+    border: none;
+    color: white;
+    padding: 14px 0;
+    font-size: 1.3em;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(90, 125, 42, 0.7);
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: linear-gradient(90deg, #a8e063, #5a7d2a);
+  }
+
+  /* เนื้อหา */
+  #content {
+    display: none;
+  }
+
+  /* แบบทดสอบ */
+  #quiz {
+    display: none;
+  }
+  #userNameDisplay {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #5a7d2a;
+  }
+  #timer {
+    font-weight: 700;
+    font-size: 1.4em;
+    color: #a8e063;
+    margin-bottom: 15px;
+    text-align: center;
+    background: #dff0d8;
+    border-radius: 12px;
+    padding: 10px 0;
+    box-shadow: 0 3px 12px rgba(168, 224, 99, 0.5);
+  }
+  #questionContainer {
+    font-size: 1.15em;
+    margin-bottom: 20px;
+  }
+  .question {
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #5a7d2a;
+  }
+  .answers label {
+    display: block;
+    margin: 12px 0;
+    cursor: pointer;
+    background: #f7ffe5;
+    border-radius: 10px;
+    padding: 12px 18px;
+    color: #3a5521;
+    font-weight: 600;
+    transition: background 0.25s ease;
+    box-shadow: 0 3px 10px rgba(90, 125, 42, 0.15);
+  }
+  .answers label:hover {
+    background: #e2f0b3;
+  }
+  .answers input[type="radio"] {
+    margin-right: 14px;
+    cursor: pointer;
+  }
+  #nextBtn {
+    display: block;
+    margin: 0 auto;
+    background: linear-gradient(90deg, #5a7d2a, #a8e063);
+    border: none;
+    color: white;
+    padding: 16px 36px;
+    font-size: 1.3em;
+    font-weight: 700;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(90, 125, 42, 0.7);
+    transition: background 0.3s ease;
+  }
+  #nextBtn:disabled {
+    background: #b7d68f;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* สรุปคะแนน */
+  #score {
+    display: none;
+    text-align: center;
+    color: #5a7d2a;
+    margin-top: 40px;
+  }
+  #score h2 {
+    margin-bottom: 15px;
+  }
+  #score p {
+    font-size: 1.4em;
+    font-weight: 700;
+  }
+  #score button {
+    margin-top: 30px;
+    padding: 14px 40px;
+    background: linear-gradient(90deg, #5a7d2a, #a8e063);
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(90, 125, 42, 0.7);
+    transition: background 0.3s ease;
+  }
+  #score button:hover {
+    background: linear-gradient(90deg, #a8e063, #5a7d2a);
+  }
+</style>
+</head>
+<body>
+
+<div id="container">
+
+  <!-- หน้าใส่ชื่อ -->
+  <div id="nameSection">
+    <h1>บทเรียนคอมพิวเตอร์ช่วยสอน</h1>
+    <h1>เรื่อง Godot Engine สำหรับเกม 2 มิติ</h1>
+    <form id="nameForm" onsubmit="return false;">
+      <label for="nameInput">ชื่อ-นามสกุล:</label>
+      <input type="text" id="nameInput" placeholder="กรอกชื่อของคุณ" required minlength="2" />
+      <button id="startQuizBtn" type="submit">เริ่มเรียน</button>
+    </form>
+  </div>
+
+  <!-- เนื้อหา -->
+  <div id="content">
+
+    <h1>บทเรียน Godot Engine: การสร้างเกม 2 มิติ</h1>
+
+    <h2>1. ทำความรู้จักกับ Godot Engine</h2>
+    <p>Godot Engine เป็นโปรแกรมพัฒนาเกมแบบโอเพนซอร์สฟรี เหมาะสำหรับการสร้างเกม 2D และ 3D มีระบบ Scene และ Node ที่ช่วยให้การพัฒนาเกมง่ายและยืดหยุ่นมากขึ้น</p>
+
+    <h2>2. การสร้างโปรเจกต์เกม 2 มิติ</h2>
+    <p>ขั้นตอนพื้นฐานในการสร้างโปรเจกต์เกม 2D มีดังนี้:</p>
+    <ol>
+      <li>เปิดโปรแกรม Godot เลือก “New Project” ตั้งชื่อและเลือกที่เก็บไฟล์</li>
+      <li>เลือก Renderer (OpenGL ES 3.0 หรือ 2.0) และตั้งค่าเป็น 2D</li>
+      <li>กด “Create & Edit” เพื่อเริ่มพัฒนาเกม</li>
+    </ol>
+
+    <h2>3. Scene & Node</h2>
+    <p>เกมใน Godot ประกอบด้วย Scene ซึ่งเป็นกลุ่มของ Node หลายตัว ตัวอย่าง Node ที่สำคัญ:</p>
+    <ul>
+      <li><b>Node2D:</b> ใช้จัดการตำแหน่งและการเคลื่อนที่ใน 2D</li>
+      <li><b>Sprite:</b> แสดงภาพตัวละครหรือวัตถุ</li>
+      <li><b>KinematicBody2D:</b> ตัวละครหรือวัตถุที่เคลื่อนที่ได้และตรวจจับการชน</li>
+      <li><b>CollisionShape2D:</b> รูปร่างสำหรับการชน</li>
+      <li><b>AnimationPlayer:</b> ควบคุมการเล่น Animation ต่างๆ</li>
+    </ul>
+
+    <h2>4. การตั้งค่า Input Map</h2>
+    <p>กำหนดปุ่มควบคุมใน <b>Project > Project Settings > Input Map</b> เช่น ปุ่มเดินซ้าย-ขวา, กระโดด เพื่อใช้ใน Script ได้ง่าย</p>
+
+    <h2>5. ควบคุมการเคลื่อนที่ของผู้เล่น</h2>
+    <p>ใช้ Script ภาษาง่ายๆ ชื่อ GDScript ตัวอย่าง:</p>
+    <pre>
+extends KinematicBody2D
+
+var speed = 200
+var velocity = Vector2.ZERO
+
+func _physics_process(delta):
+    velocity = Vector2.ZERO
+    if Input.is_action_pressed("move_right"):
+        velocity.x += 1
+    if Input.is_action_pressed("move_left"):
+        velocity.x -= 1
+    velocity = velocity.normalized() * speed
+    move_and_slide(velocity)
+    </pre>
+
+    <h2>6. การพลิกภาพตัวละคร (Flip Animation)</h2>
+    <p>เมื่อเดินซ้ายหรือขวา ปรับ <code>scale.x</code> ของ Sprite ให้เป็น -1 หรือ 1 เพื่อให้หันหน้าไปทางที่ถูกต้อง</p>
+    <pre>
+if velocity.x != 0:
+    $Sprite.scale.x = sign(velocity.x)
+    </pre>
+
+    <h2>7. การสร้าง Animation</h2>
+    <p>ใช้ <b>AnimationPlayer</b> เพื่อสร้างและเล่น Animation เช่น การเดิน กระโดด</p>
+    <pre>
+func _ready():
+    $AnimationPlayer.play("Run")
+    </pre>
+
+    <h2>8. Collision Detection (การตรวจจับการชน)</h2>
+    <p>กำหนด CollisionShape2D ให้กับ KinematicBody2D และ StaticBody2D เพื่อตรวจจับการชนและทำให้ตัวละครหยุดหรือเด้งเมื่อชนวัตถุอื่นๆ</p>
+
+    <h2>9. สร้างศัตรู (Enemy Scene)</h2>
+    <p>สร้าง Scene แยกสำหรับศัตรู เช่นเดินไปมาโดยใช้ Script ตัวอย่าง:</p>
+    <pre>
+extends KinematicBody2D
+
+var speed = 100
+var direction = Vector2(1, 0)
+
+func _physics_process(delta):
+    var velocity = direction * speed
+    var collision = move_and_collide(velocity * delta)
+    if collision:
+        direction = -direction
+    </pre>
+
+    <div class="explain">
+      <b>สรุป:</b> Godot เป็นเครื่องมือที่ง่ายและยืดหยุ่นสำหรับสร้างเกม 2D เราต้องเข้าใจ Scene และ Node, การเขียน Script ควบคุมตัวละคร, การตั้งค่า Input Map, การจัดการ Animation และ Collision ให้เหมาะสม
+    </div>
+
+    <h2 style="text-align:center; margin-top:40px;">
+      พร้อมหรือยัง? กดปุ่มด้านล่างเพื่อเริ่มทำแบบทดสอบความรู้ Godot 2D
+    </h2>
+    <button id="startQuizFromContentBtn">เริ่มทำแบบทดสอบ</button>
+  </div>
+
+  <!-- แบบทดสอบ -->
+  <div id="quiz">
+    <h2>แบบทดสอบความรู้ Godot Engine 2D</h2>
+    <div id="userNameDisplay"></div>
+    <div id="timer">เวลาที่เหลือ: <span id="timeLeft">30</span> วินาที</div>
+    <div id="questionContainer"></div>
+    <button id="nextBtn" disabled>ข้อต่อไป</button>
+  </div>
+
+  <!-- สรุปคะแนน -->
+  <div id="score"></div>
+
+</div>
+
+<script>
+  const questions = [
+    {
+      question: "Godot Engine คืออะไร?",
+      choices: [
+        "โปรแกรมสำหรับสร้างเว็บไซต์",
+        "โปรแกรมพัฒนาเกมแบบโอเพนซอร์ส",
+        "โปรแกรมตัดต่อวิดีโอ",
+        "โปรแกรมจัดการฐานข้อมูล"
+      ],
+      answer: 1
+    },
+    {
+      question: "Node ใดใช้แสดงภาพในเกม 2D?",
+      choices: ["KinematicBody2D", "Sprite", "AnimationPlayer", "CollisionShape2D"],
+      answer: 1
+    },
+    {
+      question: "Node ใดใช้สำหรับวัตถุที่เคลื่อนที่และตรวจจับการชน?",
+      choices: ["Sprite", "KinematicBody2D", "Node2D", "StaticBody2D"],
+      answer: 1
+    },
+    {
+      question: "ใน Godot การจัดการ Animation ใช้ Node ใด?",
+      choices: ["AnimationPlayer", "Sprite", "KinematicBody2D", "Area2D"],
+      answer: 0
+    },
+    {
+      question: "คำสั่งใดใช้สำหรับเคลื่อนที่ตัวละครใน Script?",
+      choices: ["move_and_slide()", "move()", "walk()", "slide_move()"],
+      answer: 0
+    },
+    {
+      question: "วิธีตั้งค่าปุ่มควบคุมใน Godot อยู่ที่ไหน?",
+      choices: [
+        "Scene Tree",
+        "Project Settings > Input Map",
+        "Animation Player",
+        "Script Editor"
+      ],
+      answer: 1
+    },
+    {
+      question: "เพื่อให้ตัวละครหันซ้ายขวาอย่างถูกต้อง เราปรับค่าอะไรใน Sprite?",
+      choices: ["rotation", "scale.x", "position", "velocity"],
+      answer: 1
+    },
+    {
+      question: "ฟังก์ชันใดใน GDScript เรียกทุกเฟรมเพื่อคำนวณฟิสิกส์?",
+      choices: ["_process(delta)", "_physics_process(delta)", "_ready()", "_init()"],
+      answer: 1
+    },
+    {
+      question: "CollisionShape2D ใช้ทำอะไร?",
+      choices: [
+        "แสดงภาพตัวละคร",
+        "กำหนดรูปร่างการชน",
+        "เล่น Animation",
+        "เขียน Script"
+      ],
+      answer: 1
+    },
+    {
+      question: "Node ใดใช้สำหรับวัตถุที่ไม่เคลื่อนที่ในฉาก เช่น ผนัง?",
+      choices: ["StaticBody2D", "KinematicBody2D", "Sprite", "AnimationPlayer"],
+      answer: 0
+    },
+    {
+      question: "ใน Script ตัวอย่างนี้ ใช้ตรวจสอบการกดปุ่มเดินขวาได้อย่างไร?\n\nif _______('move_right'):\n  velocity.x += 1",
+      choices: ["Input.is_action_pressed", "Input.check_button", "Input.pressed", "Input.is_key_down"],
+      answer: 0
+    },
+    {
+      question: "เราสร้างศัตรูใน Godot โดยแยก Scene และใช้ Node ใดเป็นหลัก?",
+      choices: ["Sprite", "KinematicBody2D", "AnimationPlayer", "Area2D"],
+      answer: 1
+    },
+    {
+      question: "ฟังก์ชัน move_and_collide() ใช้ทำอะไร?",
+      choices: [
+        "เคลื่อนที่และตรวจจับการชน",
+        "เล่น Animation",
+        "ตั้งค่าปุ่มควบคุม",
+        "สร้าง Scene ใหม่"
+      ],
+      answer: 0
+    },
+    {
+      question: "การกำหนดปุ่มเดินซ้ายและขวาใน Input Map ต้องตั้งชื่อ Action อย่างไร?",
+      choices: ["move_left และ move_right", "left_key และ right_key", "walk_left และ walk_right", "left_move และ right_move"],
+      answer: 0
+    },
+    {
+      question: "AnimationPlayer ใช้ควบคุมอะไรในเกม?",
+      choices: [
+        "แอนิเมชันของตัวละครและวัตถุ",
+        "การชนของวัตถุ",
+        "ตำแหน่งของ Node",
+        "ปุ่มควบคุม"
+      ],
+      answer: 0
+    },
+    {
+      question: "ฟังก์ชันใดใช้เล่น Animation ใน Script?",
+      choices: ["play()", "start()", "animate()", "run()"],
+      answer: 0
+    },
+    {
+      question: "Node ใดใช้ตรวจจับการชนและพื้นที่แบบไม่เคลื่อนที่?",
+      choices: ["Area2D", "Sprite", "KinematicBody2D", "StaticBody2D"],
+      answer: 0
+    },
+    {
+      question: "ใน Godot การจัดการฉาก (Scene) ทำให้เราสามารถ?",
+      choices: [
+        "สร้างและจัดการกลุ่ม Node เป็นหน่วยเดียว",
+        "ตัดต่อภาพ",
+        "ตั้งค่ากราฟิก",
+        "เขียน Script"
+      ],
+      answer: 0
+    },
+    {
+      question: "Node2D ใช้สำหรับอะไร?",
+      choices: [
+        "ตัวจัดการตำแหน่งและการเคลื่อนที่ใน 2D",
+        "แสดงภาพ",
+        "ตรวจจับการชน",
+        "เล่น Animation"
+      ],
+      answer: 0
+    },
+    {
+      question: "ใน Godot เวลาต้องการให้ตัวละครเดิน เราใช้คำสั่งใดใน Script?",
+      choices: ["move_and_slide()", "play_animation()", "set_position()", "add_child()"],
+      answer: 0
+    }
+  ];
+
+  const nameSection = document.getElementById("nameSection");
+  const content = document.getElementById("content");
+  const quiz = document.getElementById("quiz");
+  const score = document.getElementById("score");
+  const userNameDisplay = document.getElementById("userNameDisplay");
+  const questionContainer = document.getElementById("questionContainer");
+  const nextBtn = document.getElementById("nextBtn");
+  const timeLeftSpan = document.getElementById("timeLeft");
+  const startQuizBtn = document.getElementById("startQuizBtn");
+  const startQuizFromContentBtn = document.getElementById("startQuizFromContentBtn");
+  const nameInput = document.getElementById("nameInput");
+
+  let currentQuestionIndex = 0;
+  let scoreCount = 0;
+  let timer;
+  let timePerQuestion = 30; // วินาที
+  let timeRemaining;
+
+  function startTimer() {
+    timeRemaining = timePerQuestion;
+    timeLeftSpan.textContent = timeRemaining;
+    timer = setInterval(() => {
+      timeRemaining--;
+      timeLeftSpan.textContent = timeRemaining;
+      if(timeRemaining <= 0){
+        clearInterval(timer);
+        nextBtn.disabled = false;
+        nextQuestion();
+      }
+    }, 1000);
+  }
+
+  function showQuestion(){
+    clearInterval(timer);
+    nextBtn.disabled = true;
+    const q = questions[currentQuestionIndex];
+    let answersHTML = "";
+    q.choices.forEach((choice, index) => {
+      answersHTML += `
+        <label>
+          <input type="radio" name="answer" value="${index}" />
+          ${choice}
+        </label>`;
+    });
+    questionContainer.innerHTML = `
+      <div class="question">${currentQuestionIndex + 1}. ${q.question.replace(/\n/g,"<br>")}</div>
+      <div class="answers">${answersHTML}</div>
+    `;
+    startTimer();
+
+    // ฟังชั่นเลือกตัวเลือก
+    const radios = questionContainer.querySelectorAll('input[type="radio"]');
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        nextBtn.disabled = false;
+      });
+    });
+  }
+
+  function nextQuestion(){
+    // ตรวจคำตอบ
+    const selected = questionContainer.querySelector('input[name="answer"]:checked');
+    if(selected){
+      const answer = parseInt(selected.value);
+      if(answer === questions[currentQuestionIndex].answer){
+        scoreCount++;
+      }
+    }
+    currentQuestionIndex++;
+    if(currentQuestionIndex < questions.length){
+      showQuestion();
+    } else {
+      showScore();
+    }
+  }
+
+  function showScore(){
+    quiz.style.display = "none";
+    score.style.display = "block";
+    score.innerHTML = `
+      <h2>ผลการทำแบบทดสอบ</h2>
+      <p>${nameInput.value} ได้คะแนน ${scoreCount} / ${questions.length} ข้อ</p>
+      <button id="restartBtn">ทำแบบทดสอบใหม่</button>
+    `;
+    const restartBtn = document.getElementById("restartBtn");
+    restartBtn.addEventListener("click", () => {
+      currentQuestionIndex = 0;
+      scoreCount = 0;
+      score.style.display = "none";
+      nameSection.style.display = "block";
+      content.style.display = "none";
+    });
+  }
+
+  startQuizBtn.addEventListener("click", () => {
+    if(nameInput.value.trim().length < 2){
+      alert("กรุณากรอกชื่ออย่างน้อย 2 ตัวอักษร");
+      return;
+    }
+    nameSection.style.display = "none";
+    content.style.display = "block";
+  });
+
+  startQuizFromContentBtn.addEventListener("click", () => {
+    nameSection.style.display = "none";
+    content.style.display = "none";
+    quiz.style.display = "block";
+    userNameDisplay.textContent = `ผู้ทำแบบทดสอบ: ${nameInput.value}`;
+    currentQuestionIndex = 0;
+    scoreCount = 0;
+    showQuestion();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    clearInterval(timer);
+    nextQuestion();
+  });
+</script>
+
+</body>
+</html>
